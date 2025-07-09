@@ -15,6 +15,14 @@ document.addEventListener("DOMContentLoaded", () => {
       return [...Array(16)].map(() => Math.floor(Math.random() * 10)).join('');
     }
 
+    if (username == "dyyz40885") {
+        const result = document.createElement('div');
+        result.textContent = `TIDAK BISA SPAM NGL KE OWNER !!`;
+        result.style.color = 'red';
+        result.style.textAlign = 'left';
+        outputBox.appendChild(result);
+        outputBox.scrollTop = outputBox.scrollHeight;
+    } else {
     for (let i = 1; i <= jumlah; i++) {
       const formData = new URLSearchParams();
       formData.append('username', username);
@@ -50,6 +58,7 @@ document.addEventListener("DOMContentLoaded", () => {
         outputBox.appendChild(result);
         outputBox.scrollTop = outputBox.scrollHeight;
       }
+    }
     }
 
     // Setelah selesai, log data ke backend
