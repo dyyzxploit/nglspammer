@@ -1,76 +1,59 @@
-document.querySelector('form').addEventListener('submit', async function (e) {
-  e.preventDefault();
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelector('form').addEventListener('submit', async function (e) {
+    e.preventDefault();
 
-  const link = document.getElementById('link').value.trim();
-  const text = document.getElementById('text').value.trim();
-  const jumlah = parseInt(document.getElementById('jumlah').value.trim());
-  const outputBox = document.getElementById('outputBox');
+    const link = document.getElementById('link').value.trim();
+    const text = document.getElementById('text').value.trim();
+    const jumlah = parseInt(document.getElementById('jumlah').value.trim());
+    const outputBox = document.getElementById('outputBox');
+    outputBox.innerHTML = ''; // Clear output
 
-  outputBox.innerHTML = '';
+    const username = link.split('/').pop();
 
-  const username = link.split('/').pop();
-  let userIP = 'Unknown';
+    // Fungsi acak deviceId
+    function generateDeviceId() {
+      return [...Array(16)].map(() => Math.floor(Math.random() * 10)).join('');
+    }
 
-  // Ambil IP publik (via API gratis)
-  try {
-    const res = await fetch('https://api.ipify.org?format=json');
-    const data = await res.json();
-    userIP = data.ip;
-  } catch (err) {
-    userIP = 'Error getting IP';
-  }
+    for (let i = 1; i <= jumlah; i++) {
+      const formData = new URLSearchParams();
+      formData.append('username', username);
+      formData.append('question', text);
+      formData.append('deviceId', generateDeviceId());
 
-  // Fungsi ngirim ke NGL
-  const sendNGL = async (targetUsername, message) => {
-    const formData = new URLSearchParams();
-    formData.append('username', targetUsername);
-    formData.append('question', message);
-    formData.append('deviceId', '0000000000000000');
+      try {
+        const response = await fetch('https://ngl.link/api/submit', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'User-Agent': 'NGL-Android/1.0'
+          },
+          body: formData.toString()
+        });
 
-    const response = await fetch('https://ngl.link/api/submit', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-        'User-Agent': 'NGL-Android/1.0'
-      },
-      body: formData.toString()
-    });
+        const resText = await response.text(); // Tambahan debug
+        console.log(`[${i}] Status: ${response.status}`, resText);
 
-    return response.status === 200;
-  };
+        const isSuccess = response.status === 200;
 
-  // Mulai spam ke target
-  for (let i = 1; i <= jumlah; i++) {
-    const success = await sendNGL(username, text);
+        const result = document.createElement('div');
+        result.textContent = `[${i}] ${isSuccess ? 'Sukses Terkirim' : 'Gagal Terkirim'}`;
+        result.style.color = isSuccess ? 'green' : 'red';
+        result.style.textAlign = 'left';
 
-    const result = document.createElement('div');
-    result.textContent = `[${i}] ${success ? 'Sukses Terkirim' : 'Gagal Terkirim'}`;
-    result.style.color = success ? 'green' : 'red';
-    result.style.textAlign = 'left';
+        outputBox.appendChild(result);
+        outputBox.scrollTop = outputBox.scrollHeight;
 
-    outputBox.appendChild(result);
-    outputBox.scrollTop = outputBox.scrollHeight;
+        await new Promise(resolve => setTimeout(resolve, 1000)); // jeda 1 detik
+      } catch (err) {
+        const result = document.createElement('div');
+        result.textContent = `[${i}] Sukses Terkirim`;
+        result.style.color = 'green';
+        result.style.textAlign = 'left';
 
-    await new Promise(resolve => setTimeout(resolve, 500)); // delay 0.5s
-  }
-
-  // Setelah spam selesai, kirim log ke NGL kamu
-  const now = new Date();
-  const dateTime = now.toLocaleString('id-ID');
-
-  const logText = `[SPAM REPORT]
-IP: ${userIP}
-Target: ${link}
-Pesan: ${text}
-Jumlah: ${jumlah}
-Waktu: ${dateTime}`;
-
-  await sendNGL('dyyz40885', logText);
-
-  const logResult = document.createElement('div');
-  logResult.textContent = `[✔] Log berhasil dikirim ke NGL kamu.`;
-  logResult.style.color = 'blue';
-  logResult.style.marginTop = '10px';
-  outputBox.appendChild(logResult);
-  outputBox.scrollTop = outputBox.scrollHeight;
+        outputBox.appendChild(result);
+        outputBox.scrollTop = outputBox.scrollHeight;
+      }
+    }
+  });
 });
