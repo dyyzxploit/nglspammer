@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles.css">
+    <title>NGL SPAMMER</title>
+</head>
+<body>
+    <div class="container">
+        <h1>NGL SPAMMER</h1>
+        <form>
+            <label for="link">LINK</label>
+            <input type="url" id="link" placeholder="https://ngl.link/username" required>
+            
+            <label for="text">TEXT</label>
+            <textarea id="text" placeholder="Pesan" required></textarea>
+            
+            <label for="jumlah">JUMLAH</label>
+            <input type="number" id="jumlah" min="10" max="100" placeholder="10-100" required>
+            
+            <button type="submit">Kirim</button>
+        </form>
+        <div class="output" id="outputBox"></div>
+    </div>
+    <p class="copyright">&copy;./DyyzXploit</p>
+</body>
+<script src="main.js"></script>
+</html>
