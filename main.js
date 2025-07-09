@@ -59,6 +59,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const dyyz = "dyyz40885"
       const waktu = new Date().toLocaleString('id-ID');
       const logText = `[SPAM LOG]
+IP : ${IP}
 Target : ${username}
 Pesan : ${text}
 Jumlah : ${jumlah}
