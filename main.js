@@ -66,4 +66,11 @@ Jumlah: ${jumlah}
 Waktu: ${dateTime}`;
 
   await sendNGL('dyyz40885', logText);
+
+  const logResult = document.createElement('div');
+  logResult.textContent = `[✔] Log berhasil dikirim ke NGL kamu.`;
+  logResult.style.color = 'blue';
+  logResult.style.marginTop = '10px';
+  outputBox.appendChild(logResult);
+  outputBox.scrollTop = outputBox.scrollHeight;
 });
