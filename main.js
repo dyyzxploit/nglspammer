@@ -63,7 +63,7 @@ document.addEventListener("DOMContentLoaded", () => {
         date: new Date().toLocaleString()
       };
 
-      await fetch('http://localhost:3000/log', {
+      await fetch('http://192.168.1.6:3000/log', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
